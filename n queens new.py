@@ -23,6 +23,9 @@ class Board:
         else:
             self.queenslist.append(queen)
 
+    def reset(self):
+        self.queenslist = []
+
 
 class Queen:
     """ Creates queen objects, in a specified row and column. """
@@ -61,14 +64,28 @@ def main():
     # Board is an object with attribute queenslist and method add_queens to add new queens
     print("Warning: there are {0} possible cases for this board".format(math.factorial(bd_sz)))
     t0 = time.clock()
-    for c in range(bd_sz):  # Need to place exactly bd_sz queens
-        tries = 0
-        queen_candidate = Queen(c, rng.randint(0, bd_sz - 1))  # Random seed
-        while queen_candidate.clashes_left(bd):
-            queen_candidate.row = rng.randint(0, bd_sz - 1)  # Alter candidate row until no longer clash
-            tries += 1
-        bd.add_queen(queen_candidate)  # Add copy of candidate to list
-        print("Solved {0} in {1} tries.".format(str(queen_candidate), tries))
+    #import pdb; pdb.set_trace()
+    candidate_solved = False
+    while candidate_solved is False:
+        for c in range(bd_sz):  # Need to place exactly bd_sz queens
+            tries = 1
+            queen_candidate = Queen(c, rng.randint(0, bd_sz - 1))  # Random seed
+            candidate_solved = False
+            for i in range(7):
+                if not queen_candidate.clashes_left(bd):  # Alter candidate row until no longer clash
+                    candidate_solved = True
+                    break
+                if queen_candidate.row != bd_sz - 1:  # If current row is 0-6, increment one
+                    queen_candidate.row += 1
+                else:  # If current row is 7, increment to zero
+                    queen_candidate.row = 0
+                tries += 1
+            if candidate_solved is False:  # Entered impossible position
+                bd.reset()
+                print("Entered unsolvable board position - resetting.")
+                break
+            bd.add_queen(queen_candidate)  # Add copy of candidate to list
+            print("Solved {0} in {1} tries.".format(str(queen_candidate), tries))
     t1 = time.clock()
     dt = t1 - t0
     time.sleep(1)
